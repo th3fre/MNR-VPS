@@ -1,7 +1,6 @@
-cat << 'EOF' > setup.sh
 #!/bin/bash
 # سكريبت إعداد خوادم VPN المتكامل
-# الإصدار: المستقر (v3.3 - دمج جميع البروتوكولات على المنفذ 80 و 443 عبر sslh)
+# الإصدار: المستقر (v3.3)
 
 GREEN='\033[1;32m'
 RED='\033[1;31m'
@@ -10,13 +9,14 @@ CYAN='\033[1;36m'
 
 function setup_sslh() {
     echo -e "${CYAN}جاري إعداد sslh لمشاركة المنفذين 80 و 443...${NC}"
-    apt-get install -y sslh
+    apt-get update && apt-get install -y sslh
     cat > /etc/default/sslh <<END
 RUN=yes
 DAEMON_OPTS="--user sslh --listen 0.0.0.0:443 --listen 0.0.0.0:80 --ssh 127.0.0.1:143 --openvpn 127.0.0.1:1194 --anyvpn 127.0.0.1:8443"
 END
     systemctl restart sslh
     systemctl enable sslh
+    echo -e "${GREEN}تم تفعيل مشاركة المنافذ!${NC}"
 }
 
 function setup_openvpn() {
@@ -52,14 +52,14 @@ function install_all_services() {
     bash -c "$(curl -L https://github.com/XTLS/Xray-install/raw/main/install-release.sh)" @ install
     setup_openvpn
     setup_sslh
-    echo -e "${GREEN}تم التثبيت! جميع الخدمات تعمل الآن خلف المنافذ 80 و 443.${NC}"
+    echo -e "${GREEN}تم التثبيت! جميع الخدمات تعمل خلف المنافذ 80 و 443.${NC}"
 }
 
 while true; do
     clear
-    echo "مدير VPN المتكامل (V3.3 - Pro)"
-    echo "1. تثبيت الكل (دمج المنافذ 80/443)"
-    echo "2. إنشاء حساب Xray موحد"
+    echo "مدير VPN المتكامل (V3.3)"
+    echo "1. تثبيت الكل"
+    echo "2. إنشاء حساب Xray"
     echo "0. خروج"
     read -p "اختر: " choice
     case $choice in
@@ -68,5 +68,3 @@ while true; do
         0) exit 0 ;;
     esac
 done
-EOF
-chmod +x setup.sh
