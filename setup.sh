@@ -1,6 +1,6 @@
 #!/bin/bash
 # سكريبت إعداد خوادم VPN المتكامل
-# الإصدار: المستقر (v3.3)
+# الإصدار: المستقر (v3.3 - مُعدل لضمان استقرار الملفات)
 
 GREEN='\033[1;32m'
 RED='\033[1;31m'
@@ -10,10 +10,10 @@ CYAN='\033[1;36m'
 function setup_sslh() {
     echo -e "${CYAN}جاري إعداد sslh لمشاركة المنفذين 80 و 443...${NC}"
     apt-get update && apt-get install -y sslh
-    cat > /etc/default/sslh <<END
+    cat > /etc/default/sslh <<'EOF'
 RUN=yes
 DAEMON_OPTS="--user sslh --listen 0.0.0.0:443 --listen 0.0.0.0:80 --ssh 127.0.0.1:143 --openvpn 127.0.0.1:1194 --anyvpn 127.0.0.1:8443"
-END
+EOF
     systemctl restart sslh
     systemctl enable sslh
     echo -e "${GREEN}تم تفعيل مشاركة المنافذ!${NC}"
@@ -34,14 +34,15 @@ function create_xray_user() {
     read -p "أدخل اسم العميل: " client_name
     new_uuid=$(cat /proc/sys/kernel/random/uuid)
     mkdir -p /usr/local/etc/xray/
-    cat > /usr/local/etc/xray/config.json <<END
+    cat > /usr/local/etc/xray/config.json <<'EOF'
 {
   "inbounds": [
-    { "port": 8443, "protocol": "vless", "settings": { "clients": [ { "id": "$new_uuid" } ], "decryption": "none" }, "streamSettings": { "network": "ws", "wsSettings": { "path": "/vless" } } }
+    { "port": 8443, "protocol": "vless", "settings": { "clients": [ { "id": "REPLACE_UUID" } ], "decryption": "none" }, "streamSettings": { "network": "ws", "wsSettings": { "path": "/vless" } } }
   ],
   "outbounds": [ { "protocol": "freedom" } ]
 }
-END
+EOF
+    sed -i "s/REPLACE_UUID/$new_uuid/" /usr/local/etc/xray/config.json
     systemctl restart xray
     echo -e "${GREEN}تم إنشاء المستخدم: $new_uuid${NC}"
     sleep 3
