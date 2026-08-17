@@ -1,5 +1,5 @@
-cat << 'EOF' > README.md
-# VPN Manager Pro (v3.3)
+
+# MNR VPS Pro (v3.3)
 
 أداة متكاملة لإدارة خوادم VPN بنظام احترافي. 
 
