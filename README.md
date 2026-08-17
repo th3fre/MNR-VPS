@@ -10,5 +10,4 @@ cat << 'EOF' > README.md
 
 ## طريقة التثبيت:
 ```bash
-chmod +x setup.sh
-./setup.sh
+wget https://raw.githubusercontent.com/th3fre/MNR-VPS/main/setup.sh && chmod +x setup.sh && ./setup.sh
